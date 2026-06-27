@@ -1,17 +1,34 @@
 #pragma once
 
-void playerBegin();
+class Player
+{
+public:
+    void begin();
 
-void playPause();
+    void play();
+    void pause();
+    void togglePlayPause();
 
-void nextTrack();
+    void nextTrack();
+    void previousTrack();
 
-void previousTrack();
+    void nextFolder();
+    void previousFolder();
 
-void nextFolder();
+    void volumeUp();
+    void volumeDown();
 
-void volumeUp();
+    void setVolume(int volume);
 
-void volumeDown();
+    bool isPlaying() const;
+    int currentTrack() const;
+    int currentFolder() const;
+    int volume() const;
 
-void printPlayerState();
+private:
+    bool playing = false;
+
+    int currentFolderIndex = 0;
+    int currentTrackIndex = 0;
+
+    int volumeLevel = 50;};
