@@ -3,10 +3,12 @@
 #include <Arduino.h>
 #include <FS.h>
 
+constexpr size_t MAX_NAME_LENGTH = 64;
+
 struct Track
 {
-    char folder[64];
-    char filename[128];
+    char folder[MAX_NAME_LENGTH];
+    char filename[MAX_NAME_LENGTH];
 };
 
 class Filesystem
@@ -27,13 +29,21 @@ public:
     int currentTrackIndex() const;
     int currentFolderIndex() const;
 
+    int currentTrackCount() const;
+    int currentFolderCount() const;
+
 private:
-    bool loadCurrentTrack();
+    bool loadFolder();
+
+    void countFolders();
 
     int folderIndex = 0;
     int trackIndex = 0;
 
-    Track current;
+    int folderCount = 0;
+    int trackCount = 0;
+
+    Track current{};
 };
 
 extern Filesystem filesystem;

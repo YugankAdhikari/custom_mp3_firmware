@@ -1,62 +1,147 @@
 #include "filesystem.h"
 
+#include <Arduino.h>
 #include <SD.h>
-#include <SPI.h>
 #include <cstring>
 
 Filesystem filesystem;
+
+static bool isMp3(const char *name)
+{
+    const char *dot = strrchr(name, '.');
+
+    if (!dot)
+        return false;
+
+    return
+        strcasecmp(dot, ".mp3") == 0;
+}
+
+void Filesystem::countFolders()
+{
+    folderCount = 0;
+
+    File music = SD.open("/Music");
+
+    if (!music)
+        return;
+
+    while (true)
+    {
+        File entry = music.openNextFile();
+
+        if (!entry)
+            break;
+
+        if (entry.isDirectory())
+            folderCount++;
+
+        entry.close();
+    }
+
+    music.close();
+}
 
 bool Filesystem::begin()
 {
     folderIndex = 0;
     trackIndex = 0;
-    folderCount = 0;
-    trackCount = 0;
 
-    return loadCurrentTrack();
+    countFolders();
+
+    if (folderCount == 0)
+        return false;
+
+    return loadFolder();
 }
 
-bool Filesystem::nextTrack()
+bool Filesystem::loadFolder()
 {
-    return false;
-}
+    memset(&cache, 0, sizeof(cache));
 
-bool Filesystem::previousTrack()
-{
-    return false;
-}
+    File music = SD.open("/Music");
 
-bool Filesystem::nextFolder()
-{
-    return false;
-}
+    if (!music)
+        return false;
 
-bool Filesystem::previousFolder()
-{
-    return false;
-}
+    File folder;
 
-const Track& Filesystem::currentTrack() const
-{
-    return current;
-}
+    int current = 0;
 
-File Filesystem::openCurrentTrack()
-{
-    return File();
-}
+    while (true)
+    {
+        folder = music.openNextFile();
 
-int Filesystem::currentTrackIndex() const
-{
-    return trackIndex;
-}
+        if (!folder)
+        {
+            music.close();
+            return false;
+        }
 
-int Filesystem::currentFolderIndex() const
-{
-    return folderIndex;
-}
+        if (!folder.isDirectory())
+        {
+            folder.close();
+            continue;
+        }
 
-bool Filesystem::loadCurrentTrack()
-{
-    return false;
+        if (current == folderIndex)
+            break;
+
+        current++;
+
+        folder.close();
+    }
+
+    strncpy(
+        cache.folderName,
+        folder.name(),
+        MAX_NAME_LENGTH - 1
+    );
+
+    while (true)
+    {
+        File file = folder.openNextFile();
+
+        if (!file)
+            break;
+
+        if (file.isDirectory())
+        {
+            file.close();
+            continue;
+        }
+
+        if (!isMp3(file.name()))
+        {
+            file.close();
+            continue;
+        }
+
+        if (cache.trackCount >= MAX_TRACKS)
+        {
+            file.close();
+            break;
+        }
+
+        strncpy(
+            cache.tracks[cache.trackCount].filename,
+            file.name(),
+            MAX_NAME_LENGTH - 1
+        );
+
+        cache.trackCount++;
+
+        file.close();
+    }
+
+    folder.close();
+    music.close();
+
+    if (cache.trackCount == 0)
+        return false;
+
+    if (trackIndex >= cache.trackCount)
+        trackIndex = 0;
+
+    return true;
 }
