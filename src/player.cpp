@@ -1,144 +1,43 @@
 #include "player.h"
-#include "filesystem.h"
-#include <Arduino.h>
 
-void Player::printStatus()
-{
-    const Folder* library = getLibrary();
-    const Folder& folder = library[currentFolderIndex];
+void Player::begin() {}
 
-    Serial.println();
-    Serial.println("==============================");
-    Serial.println("      CYBER CASSETTE");
-    Serial.println("==============================");
+void Player::play() {}
 
-    Serial.printf("Status : %s\n",
-                  playing ? "Playing" : "Paused");
+void Player::pause() {}
 
-    Serial.printf("Folder : %s\n",
-                  folder.name);
+void Player::togglePlayPause() {}
 
-    Serial.printf("Track  : %d / %d\n",
-                  currentTrackIndex + 1,
-                  folder.songCount);
+void Player::nextTrack() {}
 
-    Serial.printf("Song   : %s\n",
-                  folder.songs[currentTrackIndex].title);
+void Player::previousTrack() {}
 
-    Serial.printf("Volume : %d%%\n",
-                  volumeLevel);
+void Player::nextFolder() {}
 
-    Serial.println("==============================");
-}
+void Player::previousFolder() {}
 
-void Player::begin()
-{
-    Serial.println("Player Ready");
-    printStatus();
-}
+void Player::volumeUp() {}
 
-void Player::play()
-{
-    playing = true;
-    printStatus();
-}
-
-void Player::pause()
-{
-    playing = false;
-    printStatus();
-}
-
-void Player::togglePlayPause()
-{
-    playing = !playing;
-    printStatus();
-}
-
-void Player::nextTrack()
-{
-    const Folder* library = getLibrary();
-    const Folder& folder = library[currentFolderIndex];
-
-    currentTrackIndex++;
-
-    if (currentTrackIndex >= folder.songCount)
-        currentTrackIndex = 0;
-
-    printStatus();
-}
-
-void Player::previousTrack()
-{
-    const Folder* library = getLibrary();
-    const Folder& folder = library[currentFolderIndex];
-
-    currentTrackIndex--;
-
-    if (currentTrackIndex < 0)
-        currentTrackIndex = folder.songCount - 1;
-
-    printStatus();
-}
-
-void Player::nextFolder()
-{
-    currentFolderIndex++;
-
-    if (currentFolderIndex >= getFolderCount())
-        currentFolderIndex = 0;
-
-    currentTrackIndex = 0;
-
-    printStatus();
-}
-
-void Player::previousFolder()
-{
-    currentFolderIndex--;
-
-    if (currentFolderIndex < 0)
-        currentFolderIndex = getFolderCount() - 1;
-
-    currentTrackIndex = 0;
-
-    printStatus();
-}
-
-void Player::volumeUp()
-{
-    if (volumeLevel < 100)
-        volumeLevel++;
-
-    printStatus();
-}
-
-void Player::volumeDown()
-{
-    if (volumeLevel > 0)
-        volumeLevel--;
-
-    printStatus();
-}
+void Player::volumeDown() {}
 
 void Player::setVolume(int volume)
 {
-    volumeLevel = constrain(volume, 0, 100);
+    volumeLevel = volume;
 }
 
 bool Player::isPlaying() const
 {
-    return playing;
+    return false;
 }
 
 int Player::currentTrack() const
 {
-    return currentTrackIndex;
+    return 0;
 }
 
 int Player::currentFolder() const
 {
-    return currentFolderIndex;
+    return 0;
 }
 
 int Player::volume() const

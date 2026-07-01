@@ -4,11 +4,18 @@
 #include <FS.h>
 
 constexpr size_t MAX_NAME_LENGTH = 64;
+constexpr int MAX_TRACKS = 512;
 
 struct Track
 {
-    char folder[MAX_NAME_LENGTH];
     char filename[MAX_NAME_LENGTH];
+};
+
+struct FolderCache
+{
+    char folderName[MAX_NAME_LENGTH];
+    Track tracks[MAX_TRACKS];
+    int trackCount = 0;
 };
 
 class Filesystem
@@ -22,6 +29,7 @@ public:
     bool nextFolder();
     bool previousFolder();
 
+    const FolderCache& currentFolder() const;
     const Track& currentTrack() const;
 
     File openCurrentTrack();
@@ -37,13 +45,12 @@ private:
 
     void countFolders();
 
+    FolderCache cache;
+
     int folderIndex = 0;
     int trackIndex = 0;
 
     int folderCount = 0;
-    int trackCount = 0;
-
-    Track current{};
 };
 
 extern Filesystem filesystem;

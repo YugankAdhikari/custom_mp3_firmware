@@ -1,10 +1,7 @@
 #include <Arduino.h>
-#include <SPI.h>
-#include <SD.h>
 
+#include "storage.h"
 #include "filesystem.h"
-
-constexpr int SD_CS = 5;
 
 void setup()
 {
@@ -12,38 +9,23 @@ void setup()
 
     delay(1000);
 
-    SPI.begin(18, 19, 23, SD_CS);
+    Serial.println();
+    Serial.println("===== CYBER CASSETTE =====");
 
-    if (!SD.begin(SD_CS))
+    if (!storage.begin())
     {
-        Serial.println("SD failed.");
-
+        Serial.println("Storage failed.");
         return;
     }
 
-    Serial.println("SD OK");
-
-    if (!filesystemOpenMusic())
+    if (!filesystem.begin())
     {
-        Serial.println("Couldn't open /Music");
-
+        Serial.println("Filesystem failed.");
         return;
     }
 
     Serial.println();
-
-    Serial.println("Folder:");
-    Serial.println(filesystemCurrentFolder());
-
-    Serial.println();
-
-    Serial.println("Song:");
-    Serial.println(filesystemCurrentSongName());
-
-    Serial.println();
-
-    Serial.println("Path:");
-    Serial.println(filesystemCurrentSongPath());
+    Serial.println("Filesystem OK");
 }
 
 void loop()
