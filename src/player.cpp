@@ -1,38 +1,63 @@
 #include "player.h"
-#include "library.h"
+#include "filesystem.h"
 #include <Arduino.h>
+
+void Player::printStatus()
+{
+    const Folder* library = getLibrary();
+    const Folder& folder = library[currentFolderIndex];
+
+    Serial.println();
+    Serial.println("==============================");
+    Serial.println("      CYBER CASSETTE");
+    Serial.println("==============================");
+
+    Serial.printf("Status : %s\n",
+                  playing ? "Playing" : "Paused");
+
+    Serial.printf("Folder : %s\n",
+                  folder.name);
+
+    Serial.printf("Track  : %d / %d\n",
+                  currentTrackIndex + 1,
+                  folder.songCount);
+
+    Serial.printf("Song   : %s\n",
+                  folder.songs[currentTrackIndex].title);
+
+    Serial.printf("Volume : %d%%\n",
+                  volumeLevel);
+
+    Serial.println("==============================");
+}
 
 void Player::begin()
 {
     Serial.println("Player Ready");
+    printStatus();
 }
 
 void Player::play()
 {
     playing = true;
-    Serial.println("[PLAYER] Play");
+    printStatus();
 }
 
 void Player::pause()
 {
     playing = false;
-    Serial.println("[PLAYER] Pause");
+    printStatus();
 }
 
 void Player::togglePlayPause()
 {
     playing = !playing;
-
-    Serial.println(
-        playing ?
-        "[PLAYER] Playing" :
-        "[PLAYER] Paused");
+    printStatus();
 }
 
 void Player::nextTrack()
 {
     const Folder* library = getLibrary();
-
     const Folder& folder = library[currentFolderIndex];
 
     currentTrackIndex++;
@@ -40,21 +65,12 @@ void Player::nextTrack()
     if (currentTrackIndex >= folder.songCount)
         currentTrackIndex = 0;
 
-    Serial.println();
-    Serial.println("==============================");
-    Serial.printf("Folder : %s\n", folder.name);
-    Serial.printf("Track  : %d / %d\n",
-                  currentTrackIndex + 1,
-                  folder.songCount);
-    Serial.printf("Song   : %s\n",
-                  folder.songs[currentTrackIndex].title);
-    Serial.println("==============================");
+    printStatus();
 }
 
 void Player::previousTrack()
 {
     const Folder* library = getLibrary();
-
     const Folder& folder = library[currentFolderIndex];
 
     currentTrackIndex--;
@@ -62,15 +78,7 @@ void Player::previousTrack()
     if (currentTrackIndex < 0)
         currentTrackIndex = folder.songCount - 1;
 
-    Serial.println();
-    Serial.println("==============================");
-    Serial.printf("Folder : %s\n", folder.name);
-    Serial.printf("Track  : %d / %d\n",
-                  currentTrackIndex + 1,
-                  folder.songCount);
-    Serial.printf("Song   : %s\n",
-                  folder.songs[currentTrackIndex].title);
-    Serial.println("==============================");
+    printStatus();
 }
 
 void Player::nextFolder()
@@ -82,18 +90,7 @@ void Player::nextFolder()
 
     currentTrackIndex = 0;
 
-    const Folder* library = getLibrary();
-
-    Serial.println();
-    Serial.println("==============================");
-    Serial.printf("Folder : %s\n",
-                  library[currentFolderIndex].name);
-    Serial.printf("Track  : %d / %d\n",
-                  currentTrackIndex + 1,
-                  library[currentFolderIndex].songCount);
-    Serial.printf("Song   : %s\n",
-                  library[currentFolderIndex].songs[currentTrackIndex].title);
-    Serial.println("==============================");
+    printStatus();
 }
 
 void Player::previousFolder()
@@ -105,18 +102,7 @@ void Player::previousFolder()
 
     currentTrackIndex = 0;
 
-    const Folder* library = getLibrary();
-
-    Serial.println();
-    Serial.println("==============================");
-    Serial.printf("Folder : %s\n",
-                  library[currentFolderIndex].name);
-    Serial.printf("Track  : %d / %d\n",
-                  currentTrackIndex + 1,
-                  library[currentFolderIndex].songCount);
-    Serial.printf("Song   : %s\n",
-                  library[currentFolderIndex].songs[currentTrackIndex].title);
-    Serial.println("==============================");
+    printStatus();
 }
 
 void Player::volumeUp()
@@ -124,7 +110,7 @@ void Player::volumeUp()
     if (volumeLevel < 100)
         volumeLevel++;
 
-    Serial.printf("[PLAYER] Volume %d\n", volumeLevel);
+    printStatus();
 }
 
 void Player::volumeDown()
@@ -132,7 +118,7 @@ void Player::volumeDown()
     if (volumeLevel > 0)
         volumeLevel--;
 
-    Serial.printf("[PLAYER] Volume %d\n", volumeLevel);
+    printStatus();
 }
 
 void Player::setVolume(int volume)

@@ -26,9 +26,12 @@ public:
     int volume() const;
 
 private:
+    void printStatus();
+
     bool playing = false;
 
     int currentFolderIndex = 0;
     int currentTrackIndex = 0;
 
-    int volumeLevel = 50;};
+    int volumeLevel = 50;
+};

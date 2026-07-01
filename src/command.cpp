@@ -75,3 +75,23 @@ void commandLoop()
         }
     }
 }
+
+void commandRotateCW()
+{
+    player.volumeUp();
+}
+
+void commandRotateCCW()
+{
+    player.volumeDown();
+}
+
+void commandClick()
+{
+    player.togglePlayPause();
+}
+
+void commandLongClick()
+{
+    player.nextFolder();
+}
