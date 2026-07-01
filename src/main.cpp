@@ -2,22 +2,24 @@
 
 #include "storage.h"
 #include "filesystem.h"
+#include "player.h"
 
 void setup()
 {
     Serial.begin(115200);
-
     delay(1000);
 
     Serial.println();
     Serial.println("===== CYBER CASSETTE =====");
 
+    // Initialize Storage
     if (!storage.begin())
     {
         Serial.println("Storage failed.");
         return;
     }
 
+    // Initialize Filesystem
     if (!filesystem.begin())
     {
         Serial.println("Filesystem failed.");
@@ -26,6 +28,9 @@ void setup()
 
     Serial.println();
     Serial.println("Filesystem OK");
+
+    // Initialize Player
+    player.begin();
 }
 
 void loop()

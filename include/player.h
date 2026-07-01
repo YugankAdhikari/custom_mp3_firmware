@@ -21,17 +21,16 @@ public:
     void setVolume(int volume);
 
     bool isPlaying() const;
-    int currentTrack() const;
-    int currentFolder() const;
+
     int volume() const;
 
 private:
     void printStatus();
 
     bool playing = false;
-
-    int currentFolderIndex = 0;
-    int currentTrackIndex = 0;
+    bool loop = false;
 
     int volumeLevel = 50;
 };
+
+extern Player player;
