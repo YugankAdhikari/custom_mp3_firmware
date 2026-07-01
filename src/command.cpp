@@ -1,80 +1,92 @@
-#include <Arduino.h>
 #include "command.h"
+
+#include <Arduino.h>
+
 #include "player.h"
 
-extern Player player;
+Command command;
 
-String input;
-
-void commandBegin()
+void Command::begin()
 {
     Serial.println();
-    Serial.println("=================================");
-    Serial.println("      Cyber Cassette v0.1");
-    Serial.println("Type 'help' to begin.");
-    Serial.println("=================================");
+    Serial.println("===== COMMAND CONSOLE =====");
+    Serial.println("Type 'h' for help.");
     Serial.println();
 }
 
-void commandLoop()
+void Command::printHelp()
 {
-    while (Serial.available())
+    Serial.println();
+    Serial.println("========== COMMANDS ==========");
+    Serial.println("h : Help");
+    Serial.println("i : Player Info");
+    Serial.println("p : Play / Pause");
+    Serial.println("n : Next Track");
+    Serial.println("b : Previous Track");
+    Serial.println("f : Next Folder");
+    Serial.println("r : Previous Folder");
+    Serial.println("+ : Volume Up");
+    Serial.println("- : Volume Down");
+    Serial.println("==============================");
+}
+
+void Command::update()
+{
+    if (!Serial.available())
+        return;
+
+    char c = Serial.read();
+
+    Serial.print("> ");
+    Serial.println(c);
+
+    switch (c)
     {
-        char c = Serial.read();
+        case 'h':
+            printHelp();
+            break;
 
-        if (c == '\n' || c == '\r')
-        {
-            input.trim();
+        case 'i':
+            player.begin();
+            break;
 
-            if (input.length() > 0)
-            {
-                Serial.print("> ");
-                Serial.println(input);
+        case 'p':
+            player.togglePlayPause();
+            break;
 
-                if (input == "next")
-                    player.nextTrack();
+        case 'n':
+            player.nextTrack();
+            break;
 
-                else if (input == "prev")
-                    player.previousTrack();
+        case 'b':
+            player.previousTrack();
+            break;
 
-                else if (input == "folder+")
-                    player.nextFolder();
+        case 'f':
+            player.nextFolder();
+            break;
 
-                else if (input == "folder-")
-                    player.previousFolder();
+        case 'r':
+            player.previousFolder();
+            break;
 
-                else if (input == "play")
-                    player.play();
+        case '+':
+            player.volumeUp();
+            break;
 
-                else if (input == "pause")
-                    player.pause();
+        case '-':
+            player.volumeDown();
+            break;
 
-                else if (input == "help")
-                {
-                    Serial.println();
-                    Serial.println("Commands:");
-                    Serial.println(" play");
-                    Serial.println(" pause");
-                    Serial.println(" next");
-                    Serial.println(" prev");
-                    Serial.println(" folder+");
-                    Serial.println(" folder-");
-                    Serial.println();
-                }
-                else
-                {
-                    Serial.println("Unknown command.");
-                }
-
-                input = "";
-            }
-        }
-        else
-        {
-            input += c;
-        }
+        default:
+            Serial.println("Unknown command.");
+            break;
     }
 }
+
+// ======================================================
+// Legacy compatibility wrappers (used by encoder.cpp)
+// ======================================================
 
 void commandRotateCW()
 {
@@ -88,10 +100,10 @@ void commandRotateCCW()
 
 void commandClick()
 {
-    player.togglePlayPause();
+    player.nextFolder();
 }
 
 void commandLongClick()
 {
-    player.nextFolder();
+    player.togglePlayPause();
 }

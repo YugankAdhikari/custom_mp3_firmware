@@ -3,6 +3,7 @@
 #include "storage.h"
 #include "filesystem.h"
 #include "player.h"
+#include "command.h"
 
 void setup()
 {
@@ -31,8 +32,12 @@ void setup()
 
     // Initialize Player
     player.begin();
+
+    // Initialize Command Console
+    command.begin();
 }
 
 void loop()
 {
+    command.update();
 }
