@@ -4,6 +4,7 @@
 #include "filesystem.h"
 #include "player.h"
 #include "command.h"
+#include "audio.h"
 
 void setup()
 {
@@ -33,11 +34,23 @@ void setup()
     // Initialize Player
     player.begin();
 
+    // Initialize Audio Engine
+    if (!audio.begin())
+    {
+        Serial.println("Audio Engine failed.");
+        return;
+    }
+
     // Initialize Command Console
     command.begin();
+
+    Serial.println();
+    Serial.println("===== SYSTEM READY =====");
 }
 
 void loop()
 {
     command.update();
+
+    audio.update();
 }
