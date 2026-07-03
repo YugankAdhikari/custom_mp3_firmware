@@ -5,6 +5,8 @@
 #include "player.h"
 #include "command.h"
 #include "audio.h"
+#include "ringbuffer.h"
+#include "bluetooth.h"
 
 void setup()
 {
@@ -41,6 +43,22 @@ void setup()
         return;
     }
 
+    // Initialize PCM Ring Buffer
+    if (!pcmBuffer.begin())
+    {
+        Serial.println("Ring Buffer failed.");
+        return;
+    }
+
+    Serial.println("PCM Ring Buffer Ready");
+
+    // Initialize Bluetooth
+    if (!bluetoothBegin())
+    {
+        Serial.println("Bluetooth failed.");
+        return;
+    }
+
     // Initialize Command Console
     command.begin();
 
@@ -53,4 +71,6 @@ void loop()
     command.update();
 
     audio.update();
+
+    bluetoothLoop();
 }

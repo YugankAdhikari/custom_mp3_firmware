@@ -1,5 +1,5 @@
 #pragma once
 
-void bluetoothBegin();
+bool bluetoothBegin();
 
 void bluetoothLoop();

@@ -3,6 +3,7 @@
 #include <Arduino.h>
 
 #include "filesystem.h"
+#include "audio.h"
 
 Player player;
 
@@ -14,7 +15,7 @@ void Player::printStatus()
     Serial.println("==============================");
 
     Serial.print("Status : ");
-    Serial.println(playing ? "Playing" : "Paused");
+    Serial.println(audio.isPlaying() ? "Playing" : "Paused");
 
     Serial.print("Folder : ");
     Serial.println(filesystem.currentFolder().folderName);
@@ -44,43 +45,93 @@ void Player::begin()
 
 void Player::play()
 {
+    if (audio.isPlaying())
+        return;
+
+    audio.play(filesystem.openCurrentTrack());
+
     playing = true;
+
     printStatus();
 }
 
 void Player::pause()
 {
+    if (!playing)
+        return;
+
+    audio.pause();
+
     playing = false;
+
     printStatus();
 }
 
 void Player::togglePlayPause()
 {
-    playing = !playing;
+    if (playing)
+    {
+        audio.pause();
+        playing = false;
+    }
+    else
+    {
+        if (audio.isPlaying())
+        {
+            audio.resume();
+        }
+        else
+        {
+            audio.play(filesystem.openCurrentTrack());
+        }
+
+        playing = true;
+    }
+
     printStatus();
 }
 
 void Player::nextTrack()
 {
-    filesystem.nextTrack();
+    if (!filesystem.nextTrack())
+        return;
+
+    if (playing)
+        audio.play(filesystem.openCurrentTrack());
+
     printStatus();
 }
 
 void Player::previousTrack()
 {
-    filesystem.previousTrack();
+    if (!filesystem.previousTrack())
+        return;
+
+    if (playing)
+        audio.play(filesystem.openCurrentTrack());
+
     printStatus();
 }
 
 void Player::nextFolder()
 {
-    filesystem.nextFolder();
+    if (!filesystem.nextFolder())
+        return;
+
+    if (playing)
+        audio.play(filesystem.openCurrentTrack());
+
     printStatus();
 }
 
 void Player::previousFolder()
 {
-    filesystem.previousFolder();
+    if (!filesystem.previousFolder())
+        return;
+
+    if (playing)
+        audio.play(filesystem.openCurrentTrack());
+
     printStatus();
 }
 

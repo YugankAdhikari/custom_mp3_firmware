@@ -20,8 +20,6 @@ public:
     void update();
 
 private:
-    File currentFile;
-
     bool playing = false;
     bool paused = false;
 };
