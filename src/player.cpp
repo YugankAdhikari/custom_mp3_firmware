@@ -4,6 +4,7 @@
 
 #include "filesystem.h"
 #include "audio.h"
+#include "bluetooth_manager.h"
 
 Player player;
 
@@ -15,7 +16,11 @@ void Player::printStatus()
     Serial.println("==============================");
 
     Serial.print("Status : ");
-    Serial.println(audio.isPlaying() ? "Playing" : "Paused");
+    if (pendingPlay) {
+        Serial.println("Pending Bluetooth Stream");
+    } else {
+        Serial.println(audio.isPlaying() ? "Playing" : "Paused");
+    }
 
     Serial.print("Folder : ");
     Serial.println(filesystem.currentFolder().folderName);
@@ -45,23 +50,30 @@ void Player::begin()
 
 void Player::play()
 {
-    if (audio.isPlaying())
+    if (audio.isPlaying() && !pendingPlay)
         return;
 
-    audio.play(filesystem.openCurrentTrack());
-
     playing = true;
+
+    if (!bluetooth.streaming()) {
+        pendingPlay = true;
+        Serial.println("Playback requested. Waiting for Bluetooth STREAMING state...");
+    } else {
+        pendingPlay = false;
+        audio.play(filesystem.openCurrentTrack());
+    }
 
     printStatus();
 }
 
 void Player::pause()
 {
+    pendingPlay = false;
+    
     if (!playing)
         return;
 
     audio.pause();
-
     playing = false;
 
     printStatus();
@@ -71,24 +83,22 @@ void Player::togglePlayPause()
 {
     if (playing)
     {
-        audio.pause();
-        playing = false;
+        pause();
     }
     else
     {
-        if (audio.isPlaying())
-        {
-            audio.resume();
-        }
-        else
-        {
-            audio.play(filesystem.openCurrentTrack());
-        }
-
-        playing = true;
+        play();
     }
+}
 
-    printStatus();
+void Player::onStreamingAvailable()
+{
+    if (pendingPlay && playing) {
+        Serial.println("Bluetooth STREAMING available. Automatically resuming playback.");
+        pendingPlay = false;
+        audio.play(filesystem.openCurrentTrack());
+        printStatus();
+    }
 }
 
 void Player::nextTrack()
@@ -96,8 +106,14 @@ void Player::nextTrack()
     if (!filesystem.nextTrack())
         return;
 
-    if (playing)
-        audio.play(filesystem.openCurrentTrack());
+    if (playing) {
+        if (!bluetooth.streaming()) {
+            pendingPlay = true;
+        } else {
+            pendingPlay = false;
+            audio.play(filesystem.openCurrentTrack());
+        }
+    }
 
     printStatus();
 }
@@ -107,8 +123,14 @@ void Player::previousTrack()
     if (!filesystem.previousTrack())
         return;
 
-    if (playing)
-        audio.play(filesystem.openCurrentTrack());
+    if (playing) {
+        if (!bluetooth.streaming()) {
+            pendingPlay = true;
+        } else {
+            pendingPlay = false;
+            audio.play(filesystem.openCurrentTrack());
+        }
+    }
 
     printStatus();
 }
@@ -118,8 +140,14 @@ void Player::nextFolder()
     if (!filesystem.nextFolder())
         return;
 
-    if (playing)
-        audio.play(filesystem.openCurrentTrack());
+    if (playing) {
+        if (!bluetooth.streaming()) {
+            pendingPlay = true;
+        } else {
+            pendingPlay = false;
+            audio.play(filesystem.openCurrentTrack());
+        }
+    }
 
     printStatus();
 }
@@ -129,8 +157,14 @@ void Player::previousFolder()
     if (!filesystem.previousFolder())
         return;
 
-    if (playing)
-        audio.play(filesystem.openCurrentTrack());
+    if (playing) {
+        if (!bluetooth.streaming()) {
+            pendingPlay = true;
+        } else {
+            pendingPlay = false;
+            audio.play(filesystem.openCurrentTrack());
+        }
+    }
 
     printStatus();
 }

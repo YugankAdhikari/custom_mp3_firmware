@@ -24,10 +24,13 @@ public:
 
     int volume() const;
 
+    void onStreamingAvailable();
+
 private:
     void printStatus();
 
     bool playing = false;
+    bool pendingPlay = false;
     bool loop = false;
 
     int volumeLevel = 50;

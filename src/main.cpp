@@ -6,7 +6,7 @@
 #include "command.h"
 #include "audio.h"
 #include "ringbuffer.h"
-#include "bluetooth.h"
+#include "bluetooth_manager.h"
 
 void setup()
 {
@@ -15,6 +15,13 @@ void setup()
 
     Serial.println();
     Serial.println("===== CYBER CASSETTE =====");
+
+    // Initialize Bluetooth BEFORE storage/audio to ensure maximum heap for BT tasks
+    if (!bluetooth.begin())
+    {
+        Serial.println("Bluetooth failed.");
+        return;
+    }
 
     // Initialize Storage
     if (!storage.begin())
@@ -52,13 +59,6 @@ void setup()
 
     Serial.println("PCM Ring Buffer Ready");
 
-    // Initialize Bluetooth
-    if (!bluetoothBegin())
-    {
-        Serial.println("Bluetooth failed.");
-        return;
-    }
-
     // Initialize Command Console
     command.begin();
 
@@ -72,5 +72,5 @@ void loop()
 
     audio.update();
 
-    bluetoothLoop();
+    bluetooth.update();
 }
